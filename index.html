@@ -3,23 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Nuancier d’atelier</title>
+<title>Colors Find</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="theme-color" content="#d6d7d2">
+<meta name="theme-color" content="#efe6d6">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Nuancier">
+<meta name="apple-mobile-web-app-title" content="Colors Find">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster&display=swap">
 <style>
-:root{--bg:#d6d7d2;--ink:#232428;--mut:#5d5f63;--card:#ecece8;--line:#b9bab4;color-scheme:light}
+:root{--bg:#efe6d6;--ink:#2a1a12;--mut:#6b5b4d;--card:#f8f2e6;--line:#cfc0a6;color-scheme:light}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Avenir Next","Segoe UI",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(80px + env(safe-area-inset-bottom))}
 main{max-width:640px;margin:0 auto;padding:12px 14px}
+.top{display:flex;align-items:center;gap:12px;padding:4px 2px 8px}
+.top img{height:58px;width:auto;flex:none}
+.top h1{font-size:1.7rem;line-height:1.1;margin:0;font-weight:700;letter-spacing:.01em}
+.top small{display:block;font-size:.95rem;font-weight:500;color:var(--mut);margin-top:2px}
+.brand{font-family:Lobster,"Brush Script MT",cursive;font-weight:400;color:#a05820;font-size:1.25em;letter-spacing:.01em}
+#splash{position:fixed;inset:0;z-index:50;background:#f4ead9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:opacity .5s ease,visibility .5s;padding:24px;text-align:center}
+#splash.off{opacity:0;visibility:hidden}
+#splash img{width:min(72vw,340px);height:auto;animation:pop .7s ease-out both}
+#splash h2{margin:6px 0 0;font-size:1.8rem;font-weight:700;color:#2a1a12}
+#splash p{margin:0;font-size:1.05rem;color:#6b5b4d}
+#splash .brand{font-size:1.6em}
+@keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
 .hero{min-height:30vh;border-radius:14px;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
 .hero b{font-size:2.4rem;font-weight:650;letter-spacing:.02em}
 .hero span{font-size:.95rem}
+.hero.small{min-height:110px}
 .ctl{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;align-items:center}
 .btn{position:relative;overflow:hidden;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 14px;border-radius:10px;font:inherit;font-weight:600;min-height:44px;cursor:pointer}
 .btn.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -60,11 +75,12 @@ canvas{width:auto;max-width:100%;max-height:52vh;display:block;margin:8px auto;b
 .hint,.empty{color:var(--mut);font-size:.9rem}
 footer{color:var(--mut);font-size:.75rem;margin:28px 0 0}
 :focus-visible{outline:3px solid #1d6ee0;outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+@media (prefers-reduced-motion:reduce){.toast,#splash{transition:none}#splash img{animation:none}}
 </style>
 </head>
 <body>
-<main><div id="app"></div>
+<div id="splash" role="img" aria-label="Colors Find by coffee-time"><img src="logo.png" alt=""><h2>Colors Find</h2><p>by <span class="brand">coffee-time</span></p></div>
+<main><header class="top"><img src="logo.png" alt="Logo Coffee Time"><div><h1>Colors Find</h1><small>by <span class="brand">coffee-time</span></small></div></header><div id="app"></div>
 <footer>Outil de fan non officiel, sans lien avec Games Workshop. Les couleurs sont calculées, aucun nom de peinture du commerce n’est intégré.</footer></main>
 <nav>
 <button data-v="couleur">Couleur</button>
@@ -143,25 +159,27 @@ function harmonies(hex){
     tri:[["Triade +120°",mk(L,C,h+120)],["Triade +240°",mk(L,C,h+240)]]
   };
 }
-function near(hex){
-  if(!S.paints.length)return null;
-  const x=lab(hex);let b=null,d=1e9;
-  for(const p of S.paints){const y=lab(p.hex),e=Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]);if(e<d){d=e;b=p}}
-  return b;
+function nearN(hex,n){
+  const x=lab(hex);
+  return S.paints.map(p=>{const y=lab(p.hex);return{p,d:Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2])}}).sort((a,b)=>a.d-b.d).slice(0,n);
 }
+const near=hex=>{const r=nearN(hex,1)[0];return r?r.p:null};
+const closeness=d=>d<.03?"très proche":d<.07?"proche":d<.12?"approximative":"éloignée";
 
 /* ---------- Vues ---------- */
 let view="couleur";
+let D={hex:S.base,brand:"",name:""};
+let photoTarget="base";
 function sw([label,hex]){
-  const n=near(hex);
-  return`<div class="sw"><button class="chip" data-act="use" data-hex="${hex}" style="background:${hex};color:${ink(hex)}"><span>${esc(label)}</span><b>${hex}</b></button><button class="plus" data-act="add" data-hex="${hex}" data-role="${esc(label)}" aria-label="Ajouter ${hex} au nuancier">+</button>${n?`<small class="mt"><i style="background:${n.hex}"></i>${esc(n.name)}</small>`:""}</div>`;
+  const r=nearN(hex,1)[0],n=r&&r.p;
+  return`<div class="sw"><button class="chip" data-act="use" data-hex="${hex}" style="background:${hex};color:${ink(hex)}"><span>${esc(label)}</span><b>${hex}</b></button><button class="plus" data-act="add" data-hex="${hex}" data-role="${esc(label)}" aria-label="Ajouter ${hex} au nuancier">+</button>${n?`<small class="mt"><i style="background:${n.hex}"></i>${esc(n.name)}${r.d>.07?" (approx.)":""}</small>`:""}</div>`;
 }
 const sec=(t,a)=>`<h2>${t}</h2><div class="row">${a.map(sw).join("")}</div>`;
 
 function vCouleur(){
   const b=S.base,H=harmonies(b),n=near(b);
   return`<section class="hero" style="background:${b};color:${ink(b)}"><b>${b}</b><span>${n?"Proche de : "+esc((n.brand?n.brand+" ":"")+n.name):"Couleur de base"}</span></section>
-  <div class="ctl"><label class="btn">Choisir<input type="color" id="pick" value="${b}"></label><input id="hex" value="${b}" maxlength="7" aria-label="Code couleur" autocapitalize="off" spellcheck="false"><button class="btn" data-act="photo">Photo</button></div>
+  <div class="ctl"><label class="btn">Choisir<input type="color" id="pick" value="${b}"></label><input id="hex" value="${b}" maxlength="7" aria-label="Code couleur" autocapitalize="off" spellcheck="false"><button class="btn" data-act="photo" data-target="base">Photo</button></div>
   <div class="ctl"><button class="btn pri" data-act="add" data-hex="${b}" data-role="Base">Ajouter la base au nuancier</button></div>`
   +sec("Ombres et lumières",H.ramp)+sec("Complémentaire",H.comp)+sec("Complémentaire partagée",H.split)+sec("Analogues",H.ana)+sec("Triade",H.tri);
 }
@@ -174,9 +192,16 @@ function vNuancier(){
   <div class="ctl"><button class="btn" data-act="export">Exporter</button><label class="btn">Importer<input type="file" id="imp" accept=".json,application/json" hidden></label><button class="btn warn" data-act="delp">Supprimer ce nuancier</button></div>`;
 }
 function vPeintures(){
-  return`<p class="hint">Ajoute les peintures que tu possèdes, avec tes propres noms. Sous chaque nuance, l’appli indique la plus proche de ta collection.</p>
-  <div class="form"><label>Marque<input id="pb" placeholder="facultatif"></label><label>Nom<input id="pnm" placeholder="Rouge sombre"></label><label>Couleur<input type="color" id="pcol" value="${S.base}" style="position:static;opacity:1;height:48px;padding:2px"></label><button class="btn pri" data-act="addpaint">Ajouter la peinture</button></div>
-  ${S.paints.length?S.paints.map((p,i)=>`<div class="line"><span class="dot" style="background:${p.hex}"></span><div><b>${esc(p.name)}</b><br><small class="hint">${esc(p.brand||"Sans marque")} – ${p.hex}</small></div><button class="x" data-act="delpaint" data-i="${i}" aria-label="Retirer ${esc(p.name)}">✕</button></div>`).join(""):`<p class="empty">Aucune peinture enregistrée pour le moment.</p>`}`;
+  const c=D.hex,close=nearN(c,3);
+  const item=(p,extra,del)=>`<div class="line"><span class="dot" style="background:${p.hex}"></span><div><b>${esc(p.name)}</b><br><small class="hint">${esc(p.brand||"Sans marque")} – ${p.hex}${extra}</small></div>${del}</div>`;
+  return`<p class="hint">Prends la couleur d’un pot en photo, ou choisis-la à la main, donne-lui ton propre nom et ajoute-la à ta collection. L’appli te dit toujours quelle peinture de ta collection s’en rapproche le plus.</p>
+  <section class="hero small" style="background:${c};color:${ink(c)}"><b>${c}</b><span>Couleur à ajouter ou à chercher</span></section>
+  <div class="ctl"><button class="btn pri" data-act="photo" data-target="paint">Photo du pot</button><label class="btn">Choisir<input type="color" id="pcol" value="${c}"></label><button class="btn" data-act="frombase">Prendre la base</button></div>
+  <div class="form"><label>Marque<input id="pb" value="${esc(D.brand)}" placeholder="facultatif"></label><label>Nom<input id="pnm" value="${esc(D.name)}" placeholder="Rouge sombre"></label><button class="btn pri" data-act="addpaint">Ajouter à ma collection</button></div>
+  <h2>Les plus proches dans ma collection</h2>
+  ${close.length?close.map(r=>item(r.p,", "+closeness(r.d),"")).join(""):`<p class="empty">Ta collection est vide. Ajoute une première peinture pour voir les correspondances.</p>`}
+  <h2>Ma collection (${S.paints.length})</h2>
+  ${S.paints.length?S.paints.map((p,i)=>item(p,"",`<button class="x" data-act="delpaint" data-i="${i}" aria-label="Retirer ${esc(p.name)}">✕</button>`)).join(""):`<p class="empty">Aucune peinture enregistrée pour le moment.</p>`}`;
 }
 function render(){
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v===view));
@@ -190,7 +215,8 @@ $("#app").addEventListener("click",e=>{
   const a=t.dataset.act,d=t.dataset,p=cur();
   if(a==="use"){S.base=d.hex;view="couleur";save();render();scrollTo(0,0)}
   else if(a==="add"){p.colors.push({hex:d.hex,role:d.role||""});save();toast(`Ajouté à « ${p.name} »`)}
-  else if(a==="photo")$("#file").click();
+  else if(a==="photo"){photoTarget=d.target||"base";$("#file").click()}
+  else if(a==="frombase"){D.hex=S.base;render()}
   else if(a==="del"){p.colors.splice(+d.i,1);save();render()}
   else if(a==="newp"){const id=uid();S.palettes.push({id,name:"Nouveau nuancier",cat:"",colors:[]});S.cur=id;save();render()}
   else if(a==="delp"){
@@ -205,15 +231,16 @@ $("#app").addEventListener("click",e=>{
     setTimeout(()=>URL.revokeObjectURL(l.href),1000);
   }
   else if(a==="addpaint"){
-    const name=$("#pnm").value.trim();
-    if(!name){toast("Donne un nom à la peinture");return}
-    S.paints.push({brand:$("#pb").value.trim(),name,hex:$("#pcol").value.toLowerCase()});save();render();
+    D.brand=$("#pb").value.trim();D.name=$("#pnm").value.trim();
+    if(!D.name){toast("Donne un nom à la peinture");return}
+    S.paints.push({brand:D.brand,name:D.name,hex:D.hex});D.name="";save();render();toast("Peinture ajoutée");
   }
   else if(a==="delpaint"){S.paints.splice(+d.i,1);save();render()}
 });
 $("#app").addEventListener("change",e=>{
   const t=e.target,p=cur();
-  if(t.id==="pick"||t.id==="hex"){
+  if(t.id==="pcol"){D.brand=$("#pb").value;D.name=$("#pnm").value;D.hex=t.value.toLowerCase();render()}
+  else if(t.id==="pick"||t.id==="hex"){
     let v=t.value.trim().toLowerCase();if(/^[0-9a-f]{6}$/.test(v))v="#"+v;
     if(/^#[0-9a-f]{6}$/.test(v)){S.base=v;save();render()}else toast("Code invalide. Format attendu : #a1b2c3");
   }
@@ -232,6 +259,8 @@ $("#app").addEventListener("change",e=>{
     });
   }
 });
+
+$("#app").addEventListener("input",e=>{if(e.target.id==="pb")D.brand=e.target.value;if(e.target.id==="pnm")D.name=e.target.value});
 
 /* ---------- Photo ---------- */
 const cv=$("#cv"),cx=cv.getContext("2d",{willReadFrequently:true}),dlg=$("#dlg");
@@ -268,9 +297,15 @@ cv.onclick=e=>{
   cx.strokeStyle="#000";cx.lineWidth=1;cx.beginPath();cx.arc(x,y,R+6,0,7);cx.stroke();
 };
 $("#dx").onclick=()=>dlg.close();
-$("#use").onclick=()=>{if(!pick)return;S.base=pick;save();dlg.close();view="couleur";render();scrollTo(0,0)};
+$("#use").onclick=()=>{
+  if(!pick)return;
+  if(photoTarget==="paint"){D.hex=pick;view="peintures"}else{S.base=pick;save();view="couleur"}
+  dlg.close();render();scrollTo(0,0);
+};
 
 /* ---------- Démarrage ---------- */
+(()=>{const sp=$("#splash");let done=false;const hide=()=>{if(done)return;done=true;sp.classList.add("off");setTimeout(()=>sp.remove(),600)};
+sp.addEventListener("click",hide);setTimeout(hide,matchMedia("(prefers-reduced-motion:reduce)").matches?600:1800)})();
 render();
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 </script>

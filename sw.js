@@ -1,5 +1,5 @@
-const C = "nuancier-v1";
-const F = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
+const C = "colorsfind-v3";
+const F = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "logo.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(C).then(c => c.addAll(F)));
@@ -21,7 +21,7 @@ self.addEventListener("fetch", e => {
     caches.match(e.request).then(m => {
       const n = fetch(e.request)
         .then(r => {
-          if (r.ok) {
+          if (r.ok || r.type === "opaque") {
             const c = r.clone();
             caches.open(C).then(x => x.put(e.request, c));
           }
