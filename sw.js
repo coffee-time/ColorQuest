@@ -1,5 +1,5 @@
-const C = "colorsfind-v3";
-const F = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "logo.png", "icon-512.png", "apple-touch-icon.png"];
+const C = "colorquest-v5";
+const F = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-maskable-512.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(C).then(c => c.addAll(F)));

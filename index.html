@@ -3,31 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Colors Find</title>
+<title>ColorQuest</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <meta name="theme-color" content="#efe6d6">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Colors Find">
+<meta name="apple-mobile-web-app-title" content="ColorQuest">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster&display=swap">
 <style>
+@font-face{font-family:"CQ";font-weight:800;font-style:normal;src:url(data:font/woff;base64,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) format("woff")}
 :root{--bg:#efe6d6;--ink:#2a1a12;--mut:#6b5b4d;--card:#f8f2e6;--line:#cfc0a6;color-scheme:light}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Avenir Next","Segoe UI",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(80px + env(safe-area-inset-bottom))}
 main{max-width:640px;margin:0 auto;padding:12px 14px}
 .top{display:flex;align-items:center;gap:12px;padding:4px 2px 8px}
-.top img{height:58px;width:auto;flex:none}
-.top h1{font-size:1.7rem;line-height:1.1;margin:0;font-weight:700;letter-spacing:.01em}
+.top .mk{width:62px;height:auto;flex:none}
+.wmk{font-family:"CQ","Inter","Arial Black",system-ui,sans-serif;font-weight:800;letter-spacing:-.02em;color:#a05820;margin:0}
+.wmk b{color:#2f6f7a;font-weight:800}
+.top h1{font-size:1.9rem;line-height:1}
 .top small{display:block;font-size:.95rem;font-weight:500;color:var(--mut);margin-top:2px}
 .brand{font-family:Lobster,"Brush Script MT",cursive;font-weight:400;color:#a05820;font-size:1.25em;letter-spacing:.01em}
 #splash{position:fixed;inset:0;z-index:50;background:#f4ead9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:opacity .5s ease,visibility .5s;padding:24px;text-align:center}
 #splash.off{opacity:0;visibility:hidden}
-#splash img{width:min(72vw,340px);height:auto;animation:pop .7s ease-out both}
-#splash h2{margin:6px 0 0;font-size:1.8rem;font-weight:700;color:#2a1a12}
+#splash .mark{width:min(62vw,260px);height:auto;animation:pop .7s ease-out both}
+#splash h2{font-size:clamp(2.6rem,12vw,3.6rem);line-height:1;margin:14px 0 0}
 #splash p{margin:0;font-size:1.05rem;color:#6b5b4d}
 #splash .brand{font-size:1.6em}
 @keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
@@ -75,12 +78,15 @@ canvas{width:auto;max-width:100%;max-height:52vh;display:block;margin:8px auto;b
 .hint,.empty{color:var(--mut);font-size:.9rem}
 footer{color:var(--mut);font-size:.75rem;margin:28px 0 0}
 :focus-visible{outline:3px solid #1d6ee0;outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.toast,#splash{transition:none}#splash img{animation:none}}
+@media (prefers-reduced-motion:reduce){.toast,#splash{transition:none}#splash .mark{animation:none}}
 </style>
 </head>
 <body>
-<div id="splash" role="img" aria-label="Colors Find by coffee-time"><img src="logo.png" alt=""><h2>Colors Find</h2><p>by <span class="brand">coffee-time</span></p></div>
-<main><header class="top"><img src="logo.png" alt="Logo Coffee Time"><div><h1>Colors Find</h1><small>by <span class="brand">coffee-time</span></small></div></header><div id="app"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><g id="bars">
+<rect x="28" y="50" width="18" height="100" rx="9" fill="#4a2512"/><rect x="52" y="50" width="18" height="100" rx="9" fill="#7a3f17"/><rect x="76" y="50" width="18" height="100" rx="9" fill="#a8601f"/><rect x="100" y="50" width="18" height="100" rx="9" fill="#d99a4e"/><rect x="124" y="50" width="18" height="100" rx="9" fill="#f2cf93"/><rect x="154" y="50" width="18" height="100" rx="9" fill="#2f6f7a"/>
+</g></defs></svg>
+<div id="splash" role="img" aria-label="ColorQuest by coffee-time"><svg class="mark" viewBox="24 46 152 108" aria-hidden="true"><use href="#bars"/></svg><h2 class="wmk">Color<b>Quest</b></h2><p>by <span class="brand">coffee-time</span></p></div>
+<main><header class="top"><svg class="mk" viewBox="24 46 152 108" aria-hidden="true"><use href="#bars"/></svg><div><h1 class="wmk">Color<b>Quest</b></h1><small>by <span class="brand">coffee-time</span></small></div></header><div id="app"></div>
 <footer>Outil de fan non officiel, sans lien avec Games Workshop. Les couleurs sont calculées, aucun nom de peinture du commerce n’est intégré.</footer></main>
 <nav>
 <button data-v="couleur">Couleur</button>
